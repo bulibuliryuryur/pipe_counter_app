@@ -1,0 +1,8 @@
+# 仮想環境とIDE設定ファイルを除外
+venv/
+*.pyc
+__pycache__/
+.DS_Store
+.env
+.idea/
+.vscode/
