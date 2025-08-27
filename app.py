@@ -11,19 +11,18 @@ st.set_page_config(page_title="パイプカウントアプリ", layout="wide")
 st.title("パイプの本数を数えるWebアプリ")
 
 # --- YOLOv5モデルのロード (Streamlitのキャッシュ機能を使って効率化) ---
-@st.cache_resource
+@st.cache_resource(hash_funcs={torch.nn.Module: lambda _: None})
 def load_yolo_model():
     """
     YOLOv5モデルをロードし、Streamlitのキャッシュに保存します。
-    これにより、アプリの再起動時にモデルの再ロードが不要になります。
     """
     try:
-        # PyTorch HubからYOLOv5モデルをロード
         model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
         return model
     except Exception as e:
-        st.error(f"モデルのロード中にエラーが発生しました。必要なライブラリがインストールされているか確認してください。\nエラー: {e}")
+        st.error(f"モデルのロード中にエラーが発生しました。\nエラー: {e}")
         return None
+
 
 model = load_yolo_model()
 
