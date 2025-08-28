@@ -1,17 +1,23 @@
-seaborn==0.13.2
+# 基本
 streamlit==1.45.1
-streamlit-cropper==0.2.2
-streamlit-image-coordinates==0.3.1
-streamlit-webrtc==0.62.4
-
-torch==2.1.0
-torchvision==0.16.0
+seaborn==0.13.2
 numpy==1.26.4
 pandas==2.2.2
-opencv-python-headless==4.10.0.84
 matplotlib==3.9.2
 pillow==10.4.0
 scipy==1.14.1
-requests==2.32.3
 tqdm==4.66.5
 PyYAML==6.0.1
+requests==2.32.3
+
+# OpenCV
+opencv-python-headless==4.10.0.84
+
+# PyTorch（YOLOv5用）
+torch==2.1.0
+torchvision==0.16.0
+
+# WebRTCや画像処理
+streamlit-webrtc==0.62.4
+streamlit-image-coordinates==0.3.1
+streamlit-cropper==0.2.2
