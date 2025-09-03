@@ -20,14 +20,11 @@ Pillow>=10.0.0
 matplotlib>=3.3
 seaborn>=0.11.0
 
-# YOLO 関連
-ultralytics>=8.2.64
+# YOLOv5 でよく必要
 thop>=0.1.1
-
-# その他
 PyYAML>=5.3.1
 tqdm>=4.66.3
 requests>=2.32.2
-protobuf<=3.20.1   # YOLOv5 でよく必要
+protobuf<=3.20.1
 typing_extensions>=4.0.0
 psutil
