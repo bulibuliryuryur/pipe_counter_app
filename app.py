@@ -51,7 +51,7 @@ if uploaded_file is not None:
             img_bgr = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
 
             with st.spinner("画像を解析しています..."):
-                results = model(img_bgr, conf=0.5)
+               results = model(img_bgr)#かえました
 
             annotated_frame = results.render()[0] 
             st.image(annotated_frame, caption="検出結果", use_column_width=True, channels="BGR")
