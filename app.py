@@ -23,7 +23,7 @@ uploaded_file = st.file_uploader("パイプの画像を選択してください"
 
 original_image = None
 if uploaded_file is not None:
-    original_image = Image.open(uploaded_file)
+    original_image = Image.open(uploaded_file).convert("RGB")  # RGB化を明示
     st.image(original_image, caption="元の画像", use_column_width=True)
 
     st.write("---")
@@ -47,16 +47,18 @@ if uploaded_file is not None:
 
     if st.button("トリミングして解析", disabled=(cropped_image is None)):
         if cropped_image:
-            img_np = np.array(cropped_image)
-            img_bgr = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
+            # numpy配列（RGB形式）
+            img_rgb = np.array(cropped_image)
 
             with st.spinner("画像を解析しています..."):
-               results = model(img_bgr)#かえました
+                results = model(img_rgb)  # RGBのまま渡す
 
-            annotated_frame = results.render()[0] 
-            st.image(annotated_frame, caption="検出結果", use_column_width=True, channels="BGR")
+            # 検出結果の描画
+            annotated_frame = results.render()[0]  # numpy (RGB)
+            st.image(annotated_frame, caption="検出結果", use_column_width=True)
 
-            detections = results.pred[0]
+            # 検出結果の取得
+            detections = results.xyxy[0]  # (x1,y1,x2,y2,conf,cls)
             num_pipes = len(detections)
             st.success(f"検出されたパイプの数: **{num_pipes}本**")
 
@@ -65,9 +67,9 @@ if uploaded_file is not None:
                 cols = st.columns(min(num_pipes, 5))
                 for i, box in enumerate(detections):
                     x1, y1, x2, y2 = map(int, box[:4])
-                    final_cropped_pipe = img_bgr[y1:y2, x1:x2]
+                    final_cropped_pipe = img_rgb[y1:y2, x1:x2]  # RGBのまま
                     with cols[i % 5]:
-                        st.image(final_cropped_pipe, caption=f"パイプ {i+1}", width=100, channels="BGR")
+                        st.image(final_cropped_pipe, caption=f"パイプ {i+1}", width=100)
             else:
                 st.info("トリミングされた画像中にパイプは検出されませんでした。")
         else:
