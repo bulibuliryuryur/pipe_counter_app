@@ -23,8 +23,8 @@ if uploaded_file:
     st.image(original_image, caption="元の画像", use_column_width=True)
 
     st.write("---")
-    st.subheader("画像上で直接トリミングしてください")
-    st.info("赤い枠をドラッグして範囲を指定できます。")
+    st.subheader("画像上でトリミングしてください")
+    st.info("赤い枠をドラッグして範囲を指定すると自動的に解析されます。")
 
     # --- streamlit-cropper 設定 ---
     cropped_image = st_cropper(
@@ -36,31 +36,31 @@ if uploaded_file:
         return_type="array"  # NumPy配列で取得
     )
 
+    # --- トリミング後に自動解析 ---
     if cropped_image is not None:
         st.write("---")
         st.subheader("トリミング後の画像")
         st.image(cropped_image, caption="トリミングされた画像", use_column_width=True)
 
-        # --- 解析 ---
-        if st.button("解析開始"):
-            img_rgb = cropped_image.copy()  # RGB形式
-            with st.spinner("解析中..."):
-                results = model(img_rgb)
+        img_rgb = cropped_image.copy()  # RGB形式
+        with st.spinner("解析中..."):
+            results = model(img_rgb)
 
-            annotated_frame = results.render()[0]
-            st.image(annotated_frame, caption="検出結果", use_column_width=True)
+        # --- YOLO 検出結果表示 ---
+        annotated_frame = results.render()[0]
+        st.image(annotated_frame, caption="検出結果", use_column_width=True)
 
-            detections = results.pred[0]
-            num_pipes = len(detections)
-            st.success(f"検出されたパイプの数: **{num_pipes}本**")
+        detections = results.pred[0]
+        num_pipes = len(detections)
+        st.success(f"検出されたパイプの数: **{num_pipes}本**")
 
-            st.subheader("個別パイプ画像")
-            if num_pipes > 0:
-                cols = st.columns(min(num_pipes, 5))
-                for i, box in enumerate(detections):
-                    x1, y1, x2, y2 = map(int, box[:4])
-                    final_cropped_pipe = img_rgb[y1:y2, x1:x2]
-                    with cols[i % 5]:
-                        st.image(final_cropped_pipe, caption=f"パイプ {i+1}", width=100)
-            else:
-                st.info("パイプは検出されませんでした。")
+        st.subheader("個別パイプ画像")
+        if num_pipes > 0:
+            cols = st.columns(min(num_pipes, 5))
+            for i, box in enumerate(detections):
+                x1, y1, x2, y2 = map(int, box[:4])
+                final_cropped_pipe = img_rgb[y1:y2, x1:x2]
+                with cols[i % 5]:
+                    st.image(final_cropped_pipe, caption=f"パイプ {i+1}", width=100)
+        else:
+            st.info("パイプは検出されませんでした。")
