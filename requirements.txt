@@ -13,7 +13,7 @@ torch>=2.0.0
 torchvision>=0.15.0
 
 # 画像処理
-opencv-python-headless>=4.6.0
+opencv-python
 Pillow>=10.0.0
 # Pillow (重複しているので削除を推奨)
 
