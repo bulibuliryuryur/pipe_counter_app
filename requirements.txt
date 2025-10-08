@@ -15,13 +15,15 @@ torchvision>=0.15.0
 # 画像処理
 opencv-python-headless>=4.6.0
 Pillow>=10.0.0
-Pillow
+# Pillow (重複しているので削除を推奨)
 
 # 可視化
 matplotlib>=3.3
 seaborn>=0.11.0
 
 # YOLOv5 でよく必要
+# これらの多くはultralyticsが依存関係として自動でインストールしますが、
+# 互換性のため残しておいても問題ありません。
 thop>=0.1.1
 PyYAML>=5.3.1
 tqdm>=4.66.3
@@ -29,3 +31,6 @@ requests>=2.32.2
 protobuf<=3.20.1
 typing_extensions>=4.0.0
 psutil
+
+# 【重要】YOLOv8本体
+ultralytics
