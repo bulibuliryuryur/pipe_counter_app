@@ -13,7 +13,7 @@ torch>=2.0.0
 torchvision>=0.15.0
 
 # 画像処理
-opencv-python
+opencv-python-headless>=4.9.0.80
 Pillow>=10.0.0
 # Pillow (重複しているので削除を推奨)
 
@@ -33,4 +33,4 @@ typing_extensions>=4.0.0
 psutil
 
 # 【重要】YOLOv8本体
-ultralytics
+ultralytics==8.2.0
