@@ -9,13 +9,12 @@ pandas>=1.3.0
 scipy>=1.4.1
 
 # PyTorch
-torch>=2.0.0
-torchvision>=0.15.0
+torch==2.5.1+cpu
+torchvision==0.20.1+cpu
 
 # 画像処理
 opencv-python-headless>=4.9.0.80
 Pillow>=10.0.0
-# Pillow (重複しているので削除を推奨)
 
 # 可視化
 matplotlib>=3.3
