@@ -101,11 +101,24 @@ if st.session_state.detected:
             st.session_state["click_image"] = None 
             
 
-    # クリック座標取得
+    # --- ブラウザ幅に合わせて動的に最適幅を決定 ---
+    # PCなら1200px、タブレット900px、スマホ500px くらいにする
+    browser_width = st.get_option("browser.viewportWidth")  # ブラウザ幅取得
+
+    if browser_width >= 1600:   
+        display_width = 1200
+    elif browser_width >= 1000:
+        display_width = 900
+    else:
+        display_width = 500  # スマホ
+
+    # 幅を画像実サイズより大きくしない
+    display_width = min(display_width, annotated_image_pil.width)
+
     click = streamlit_image_coordinates(
-        annotated_image_pil,
+     annotated_image_pil,
         key="click_image",
-        width=min(800, annotated_image_pil.width)
+     width=display_width
     )
 
     # クリックされたら追加
