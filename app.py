@@ -82,7 +82,7 @@ if st.session_state.detected:
             x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
             cx = int((x1 + x2) / 2)
             cy = int((y1 + y2) / 2)
-            cv2.circle(annotated_image, (cx, cy), 12, (0, 0, 255), -1)
+            cv2.circle(annotated_image, (cx, cy), 10, (0, 0, 255), -1)
 
         st.session_state.auto_annotated = annotated_image.copy()
 
@@ -105,6 +105,7 @@ if st.session_state.detected:
     click = streamlit_image_coordinates(
         annotated_image_pil,
         key="click_image",
+        width=min(800, annotated_image_pil.width)
     )
 
     # クリックされたら追加
@@ -114,7 +115,7 @@ if st.session_state.detected:
     # 赤丸を描画
     manual_image = annotated_image.copy()
     for (px, py) in st.session_state.points:
-        cv2.circle(manual_image, (px, py), 12, (255, 0, 0), -1)
+        cv2.circle(manual_image, (px, py), 10, (255, 0, 0), -1)
 
     manual_pil = Image.fromarray(manual_image)
 
