@@ -15,35 +15,6 @@ from openvino.runtime import Core
 ie = Core()
 ie.set_property({"CACHE_DIR": ""})
 
-# ---------------------
-# レスポンシブCSSを追加
-# ---------------------
-st.markdown("""
-<style>
-/* クリック画像（streamlit-image-coordinates）の内部imgをレスポンシブ化 */
-div[id^="click_image"] img {
-    width: 100% !important;
-    height: auto !important;
-    max-width: 1200px !important;    /* PCの最大幅 */
-}
-
-/* タブレット */
-@media (max-width: 1024px) {
-    div[id^="click_image"] img {
-        max-width: 900px !important;
-    }
-}
-
-/* スマホ */
-@media (max-width: 600px) {
-    div[id^="click_image"] img {
-        max-width: 95vw !important;
-    }
-}
-</style>
-""", unsafe_allow_html=True)
-
-
 # --- モデルロード ---
 def load_model():
     model_path = "last_openvino_model"
@@ -58,6 +29,7 @@ model = load_model()
 # --- 画像アップロード ---
 uploaded_file = st.file_uploader("パイプの画像を選択してください", type=["jpg", "jpeg", "png"])
 
+
 # 状態管理
 if "detected" not in st.session_state:
     st.session_state.detected = False
@@ -65,7 +37,6 @@ if "detected" not in st.session_state:
 if "points" not in st.session_state:
     st.session_state.points = []
 
-# 自動検出キャッシュ
 if "auto_result" not in st.session_state:
     st.session_state.auto_result = None
 
@@ -75,24 +46,28 @@ if "auto_annotated" not in st.session_state:
 
 if uploaded_file:
     image = Image.open(uploaded_file).convert("RGB")
+    original_width, original_height = image.size
+
     st.image(image, caption="アップロード画像", use_column_width=True)
 
     conf_thres = st.slider("信頼度 (Confidence) の閾値", 0.0, 1.0, 0.5, 0.05)
 
 
-# 検出ボタン
+# --- パイプ検出 ---
 if st.button("パイプを検出"):
     st.session_state.detected = True
+    st.session_state.points = []
     st.session_state.auto_result = None
     st.session_state.auto_annotated = None
-    st.session_state.points = []
-    st.session_state["click_image"] = None  # クリックリセット
+    st.session_state["click_image"] = None
 
 
-# --- 検出実行 ---
+# -----------------------
+# 検出処理本体
+# -----------------------
 if st.session_state.detected and uploaded_file:
 
-    # 検出は1回のみ
+    # 検出は1回だけ
     if st.session_state.auto_result is None:
         results = model.predict(image, conf=conf_thres, verbose=False)
         result = results[0]
@@ -102,52 +77,72 @@ if st.session_state.detected and uploaded_file:
 
     num_pipes = len(result.boxes)
 
-    # 青丸を一度だけ描画
+    # 青丸描画（1回だけ）
     if st.session_state.auto_annotated is None:
-        annotated_image = np.array(image)
+        annotated = np.array(image)
+
         for box in result.boxes:
             x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
             cx = int((x1 + x2) / 2)
             cy = int((y1 + y2) / 2)
-            cv2.circle(annotated_image, (cx, cy), 10, (0, 0, 255), -1)
+            cv2.circle(annotated, (cx, cy), 10, (0, 0, 255), -1)
 
-        st.session_state.auto_annotated = annotated_image.copy()
+        st.session_state.auto_annotated = annotated.copy()
 
     annotated_image = st.session_state.auto_annotated
-    annotated_image_pil = Image.fromarray(annotated_image)
+    annotated_pil = Image.fromarray(annotated_image)
 
     st.subheader("自動検出結果 (青丸)")
     st.markdown("### ✍️ 手動カウント（赤丸を追加）")
-    st.info("画像をクリックして赤い点を追加してください。")
 
-    # --- Undo（手動点を全削除） ---
+    # --------------------------
+    # 📌 スマホ対応：画面幅に応じて縮小
+    # --------------------------
+    max_display_width = st.slider("画面幅に合わせた画像縮小 (推奨：スマホ500・PC1200)", 
+                                  400, 1200, 900)
+
+    display_width = min(max_display_width, annotated_pil.width)
+
+    # 縮小比率
+    ratio = annotated_pil.width / display_width
+
+    # --------------------------
+    # Undo（手動ポイント削除）
+    # --------------------------
     if st.button("手動の点を削除"):
         st.session_state.points = []
         st.session_state["click_image"] = None
 
-    # ----------------------------
+
+    # --------------------------
     # クリック座標の取得
-    # → レスポンシブCSSでサイズ調整するので width=None
-    # ----------------------------
+    # 実際に表示しているサイズ = display_width
+    # --------------------------
     click = streamlit_image_coordinates(
-        annotated_image_pil,
+        annotated_pil,
         key="click_image",
-        width=None  # CSSでサイズ調整
+        width=display_width
     )
 
-    # 点を追加
-    if click is not None and "x" in click and "y" in click:
-        st.session_state.points.append((int(click["x"]), int(click["y"])))
+    # 点の追加（縮小率から元座標に戻す）
+    if click is not None:
+        if "x" in click and "y" in click:
+            real_x = int(click["x"] * ratio)
+            real_y = int(click["y"] * ratio)
+            st.session_state.points.append((real_x, real_y))
+
 
     # 赤丸描画
-    manual_image = annotated_image.copy()
-    for (px, py) in st.session_state.points:
-        cv2.circle(manual_image, (px, py), 10, (255, 0, 0), -1)
+    manual = annotated_image.copy()
+    for px, py in st.session_state.points:
+        cv2.circle(manual, (px, py), 10, (255, 0, 0), -1)
 
-    manual_pil = Image.fromarray(manual_image)
+    st.image(Image.fromarray(manual), caption="青＝自動 / 赤＝手動", use_column_width=True)
 
-    st.image(manual_pil, caption="青＝自動 / 赤＝手動", use_column_width=True)
 
+    # --------------------------
+    # 結果
+    # --------------------------
     manual_count = len(st.session_state.points)
     total_pipes = num_pipes + manual_count
 
