@@ -85,7 +85,7 @@ if st.session_state.detected and uploaded_file:
             x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
             cx = int((x1 + x2) / 2)
             cy = int((y1 + y2) / 2)
-            cv2.circle(annotated, (cx, cy), 10, (0, 0, 255), -1)
+            cv2.circle(annotated, (cx, cy), 50, (255, 255, 0), -1)
 
         st.session_state.auto_annotated = annotated.copy()
 
@@ -135,7 +135,7 @@ if st.session_state.detected and uploaded_file:
     # 赤丸描画
     manual = annotated_image.copy()
     for px, py in st.session_state.points:
-        cv2.circle(manual, (px, py), 10, (255, 0, 0), -1)
+        cv2.circle(manual, (px, py), 50, (255, 0, 0), -1)
 
     st.image(Image.fromarray(manual), caption="青＝自動 / 赤＝手動", use_column_width=True)
 
