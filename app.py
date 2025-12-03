@@ -69,7 +69,13 @@ if st.session_state.detected and uploaded_file:
 
     # 検出は1回だけ
     if st.session_state.auto_result is None:
-        results = model.predict(image, conf=conf_thres, verbose=False)
+        results = model.predict(
+    image,
+    conf=conf_thres,
+    verbose=False,
+    max_det=1000
+)
+
         result = results[0]
         st.session_state.auto_result = result
     else:
