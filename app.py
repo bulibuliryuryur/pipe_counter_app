@@ -27,13 +27,11 @@ ie = Core()
 ie.set_property({"CACHE_DIR": ""})
 
 # -------------------------------------------------
-# モデルロード
+# モデルロード（ウォームアップ削除済み）
 # -------------------------------------------------
 def load_model():
     model_path = "last_openvino_model"
     model = YOLO(model_path)
-    dummy = np.random.randint(0, 256, (TARGET_SIZE, TARGET_SIZE, 3), dtype=np.uint8)
-    _ = model.predict(dummy, conf=0.01, verbose=False)
     return model
 
 model = load_model()
@@ -121,9 +119,9 @@ if st.session_state.detected and uploaded_file:
     st.subheader("自動検出結果（黄色）")
     st.markdown("### ✍️ 手動カウント（赤）")
 
-    display_width = st.slider("表示サイズ", 400, 1200, 900)
-    display_width = min(display_width, TARGET_SIZE)
-    ratio = TARGET_SIZE / display_width
+    # 表示サイズ固定（960px）
+    display_width = TARGET_SIZE
+    ratio = 1.0
 
     base_img = annotated_image.copy()
 
@@ -188,18 +186,14 @@ if st.session_state.detected and uploaded_file:
             Image.fromarray(base_img).save(img_buf, format="PNG")
             z.writestr("result.png", img_buf.getvalue())
 
-            # JSON
-            meta = {
-                "datetime": timestamp,
-                "group": group,
-                "auto_count": num_pipes,
-                "manual_count": manual_count,
-                "total_count": total_pipes
-            }
-            z.writestr("data.json", json.dumps(meta, ensure_ascii=False, indent=2))
 
-            # コメント
-            z.writestr("comment.txt", comment)
+            # CSV（見やすい日本語ヘッダ付き）
+            csv_text = "日時,グループ,自動検出本数,手動追加本数,合計本数,コメント\n"
+            csv_text += f"{timestamp.replace('_',' ')},{group},{num_pipes}本,{manual_count}本,{total_pipes}本,\"{comment}\""
+
+            z.writestr("result.csv", csv_text.encode("utf-8"))
+
+
 
         st.download_button(
             label="⬇ ZIPダウンロード",
