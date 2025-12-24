@@ -130,9 +130,9 @@ if uploaded_file:
         display_np = np.array(inference_img)
         for (x1, y1, x2, y2) in st.session_state.auto_boxes:
             cx, cy = int((x1+x2)/2), int((y1+y2)/2)
-            cv2.circle(display_np, (cx, cy), 15, (255, 255, 0), -1)
+            cv2.circle(display_np, (cx, cy), 13, (255, 255, 0), -1)
         for (px, py) in st.session_state.points:
-            cv2.circle(display_np, (px, py), 15, (255, 0, 0), -1)
+            cv2.circle(display_np, (px, py), 13, (255, 0, 0), -1)
 
         st.write("画像をクリックしてカウントを手動で追加できます。")
         fix_coords = streamlit_image_coordinates(Image.fromarray(display_np), key="manual_fix", width=TARGET_SIZE)
