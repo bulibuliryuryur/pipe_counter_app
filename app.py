@@ -46,7 +46,7 @@ def apply_masks(img, rects):
 # -------------------------------------------------
 # 4. メイン UI フロー
 # -------------------------------------------------
-st.title("パイプカウントアプリ (トリミング・検出・保存)")
+st.title("PPAP(Pipe Perceive APp)")
 
 uploaded_file = st.file_uploader("パイプの画像を選択してください", type=["jpg", "jpeg", "png"])
 
