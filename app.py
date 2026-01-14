@@ -57,7 +57,7 @@ def resize_with_aspect_ratio(img, target_max_side):
 # -------------------------------------------------
 # 4. メイン UI フロー
 # -------------------------------------------------
-st.title("PPAP(Pipe Perceive APp)")
+st.title("PINEAPPLE")
 
 uploaded_file = st.file_uploader("パイプの画像を選択してください", type=["jpg", "jpeg", "png"])
 
